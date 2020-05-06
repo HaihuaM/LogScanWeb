@@ -1,0 +1,27 @@
+{% extends "dappx/base.html" %}
+{% load static %}
+{% block body_block %}
+  <div class="container">
+    <div class="jumbotron">
+      {% if registered %}
+        <h1>Thank you for registering!</h1>
+      {% else %}
+        <!-- <h1>Register Here</h1> -->
+        <!-- <h3>Just fill out the form.</h3> -->
+<form enctype="multipart/form-data" method="POST">
+          {% csrf_token %}
+
+		<div class="form-group">
+							
+			<input type="text" name="username" class="form-control form-control-user" required id="id_username"  placeholder="User Name">
+			<input type="password" name="password" class="form-control form-control-user"  required id="id_password" placeholder="Password"  >
+			<input type="email" name="email" maxlength="254" class="form-control form-control-user"  id="id_email" placeholder="Email">
+		</div>
+          <!-- <input type="submit" name="" value="Register"> -->
+					<button class="btn btn-primary btn-user btn-block" type="submit">Register</button>
+</form>
+        
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "dappx/base.html" %}
+{% block body_block %}
+<br>
+<div class="container">
+  <div class="jumbotron">
+    <h4>Start from posting a log file.</h4>
+<hr>
+
+      <div class="form-group">
+				<div class="input-group">
+					<div class="input-group-prepend">
+						<button type="button"  class="btn input-group-text btn-secondary" onclick="UploadFileFn()" id="upload-btn" disabled>Upload</button>
+					</div>
+
+					<div class="custom-file">
+						<input type="file" class="custom-file-input" id="id_file" name="file" onchange="FileChangeFn(event)" aria-describedby="upload-btn">
+						<label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+					</div>
+				</div>
+
+				<label class="label-default" id="file_size"></label> <label class="label-default" id="file_type"></label>
+						<div id="file_box"></div>
+								<div class="progress" >
+									<div id="speed" class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: 0%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+								</div>
+        </div>
+  </div>
+
+<table class="table">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">File </th>
+      <th scope="col">Post Time</th>
+      <th scope="col">Operation</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in logs %}
+    <tr>
+      <th scope="row">{{ log.FileName }} </th>
+      <td>{{ log.PostedDate }}</td>
+      <td></td>
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+
+
+
+</div>
+
+<script>
+var uploadUrl = '/';
+//文件选择完毕时
+function FileChangeFn(event) {
+    $('.opst_txt').text('Please reselect the file.');
+		$('#upload-btn').prop('disabled', false);
+    $("#upload-btn").removeClass('btn-secondary');
+    $("#upload-btn").addClass('btn-primary');
+    var event = event || window.event,
+        dom = '',
+        ofile = $("#id_file").get(0).files[0],
+        otype = ofile.type || 'File type access failed.',
+        osize = ofile.size / 1054000,
+        ourl = window.URL.createObjectURL(ofile); 
+    $('#file_type').text("File Type：" + otype);
+    $('#file_size').text("Size: " + osize.toFixed(2) + "MB.");
+
+    $('#file_box').html(dom);
+};
+
+function OnProgRess(event) {
+    var event = event || window.event;
+    var loaded = Math.floor(100 * (event.loaded / event.total)); 
+    $("#speed").html(loaded + "%").css("width", loaded + "%");
+};
+
+
+function UploadFileFn() {
+
+    $('.progress').show();
+    var oFile = $("#id_file").get(0).files[0], 
+        formData = new FormData(); 
+    xhr = $.ajaxSettings.xhr(); 
+    formData.append("file", oFile); 
+	  formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+		console.log(formData);
+    $.ajax({
+        type: "POST",
+        url: uploadUrl, 
+        data: formData, 
+        cache: false, 
+        async: true, 
+        processData: false, 
+        contentType: false,
+        xhr: function() {
+            if (OnProgRess && xhr.upload) {
+                xhr.upload.addEventListener("progress", OnProgRess, false);
+                return xhr;
+            }
+        },
+        success: function(returndata) {
+            $("#speed").removeClass('bg-info');
+            $("#speed").addClass('bg-success');
+            $("#speed").html("Submit Success");
+					  // location.reload();
+        },
+        error: function(returndata) {
+            $("#speed").html("Submit Failed");
+            console.log(returndata)
+        }
+    });
+
+		$('#upload-btn').prop('disabled', true);
+    $("#upload-btn").removeClass('btn-primary');
+    $("#upload-btn").addClass('btn-secondary');
+};
+
+</script>
+
+{% endblock %}
